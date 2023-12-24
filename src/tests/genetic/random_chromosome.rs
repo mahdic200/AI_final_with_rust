@@ -1,14 +1,15 @@
 use crate::genetic::Genetic;
+use crate::genetic::enums::CrossoverType;
 
 #[test]
 fn length() {
-    let genetic = Genetic::new(8, 2, 0.1, 10);
+    let genetic = Genetic::new(8, 2, 0.1, 10, CrossoverType::TwoPoint);
     assert_eq!(genetic.random_chromosome().gens.len(), 8);
 }
 
 #[test]
 fn valid_range_for_gens() {
-    let genetic = Genetic::new(8, 2, 0.1, 10);
+    let genetic = Genetic::new(8, 2, 0.1, 10, CrossoverType::TwoPoint);
     for gen in &genetic.random_chromosome().gens {
         if *gen < 1 || *gen > 8 {
             assert!(false);
@@ -19,7 +20,7 @@ fn valid_range_for_gens() {
 
 #[test]
 fn unique_gens() {
-    let genetic = Genetic::new(8, 2, 0.1, 10);
+    let genetic = Genetic::new(8, 2, 0.1, 10, CrossoverType::TwoPoint);
     let mut conflicts = 0;
     for gen in &genetic.random_chromosome().gens {
         let mut count: u8 = 0;
