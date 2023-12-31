@@ -48,7 +48,7 @@ fn main() {
     for i in 0..best_fitnesses.len() {
         points.push((i as f32, best_fitnesses[i] as f32));
     }
-    println!("queens vector : {:?}", best.gens);
+    println!("result vector : {:?}", best.gens);
     println!("conflicts : {:?}", best.intersects());
     plot::draw(points, genetic.maxiter as f32).unwrap();
     println!("genetic_plot.png is your diagram. good bye !");

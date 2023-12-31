@@ -152,11 +152,37 @@ impl Genetic {
         (Rc::new(new_child_1), Rc::new(new_child_2))
     }
 
+    fn uniform_crossover(&self, parent_1: Rc<Chromosome>, parent_2: Rc<Chromosome>) -> (Rc<Chromosome>, Rc<Chromosome>) {
+        
+        let length = parent_1.gens.len();
+        let parent_1 = &parent_1.gens;
+        let parent_2 = &parent_2.gens;
+
+        let mut child1 = Vec::with_capacity(length);
+        let mut child2 = Vec::with_capacity(length);
+
+        for i in 0..length {
+            let rand_bit = rand::random::<bool>();
+            if rand_bit {
+            child1.push(parent_1[i]);
+            child2.push(parent_2[i]);
+            } else {
+            child1.push(parent_2[i]);
+            child2.push(parent_1[i]);
+            }
+        }
+
+        let child1 = Chromosome::new(child1);
+        let child2 = Chromosome::new(child2);
+
+        (Rc::new(child1), Rc::new(child2))
+    }
+
     fn crossover(&self, parent_1: Rc<Chromosome>, parent_2: Rc<Chromosome>) -> (Rc<Chromosome>, Rc<Chromosome>) {
         match self.crossover_type {
             CrossoverType::OnePoint => self.one_point_crossover(parent_1, parent_2),
             CrossoverType::TwoPoint => self.two_point_crossover(parent_1, parent_2),
-            CrossoverType::Uniform => self.two_point_crossover(parent_1, parent_2),
+            CrossoverType::Uniform => self.uniform_crossover(parent_1, parent_2),
         }
     }
 
