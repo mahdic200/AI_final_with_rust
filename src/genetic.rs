@@ -129,7 +129,11 @@ impl Genetic {
         let parent_2 = &parent_2.gens;
 
         let mut ind_1: usize = (rand::thread_rng().gen_range(0..100) % self.chromosome_length) as usize;
-        let mut ind_2: usize = (rand::thread_rng().gen_range(0..100) % (self.chromosome_length - ind_1)) + ind_1 as usize;
+        let mut ind_2: usize = (rand::thread_rng().gen_range(0..100) % self.chromosome_length) as usize;
+
+        while ind_1 == ind_2 {
+            ind_2 = (rand::thread_rng().gen_range(0..100) % self.chromosome_length) as usize;
+        }
 
         if ind_2 < ind_1 {let t = ind_2;ind_2 = ind_1;ind_1 = t;}
 
@@ -140,7 +144,17 @@ impl Genetic {
             new_child_2.push(0);
         }
 
-        for i in ind_1..=ind_2 {
+        for i in 0..=ind_1 {
+            new_child_1[i] = parent_1[i];
+            new_child_2[i] = parent_2[i];
+        }
+
+        for i in ind_1..ind_2 {
+            new_child_2[i] = parent_1[i];
+            new_child_1[i] = parent_2[i];
+        }
+
+        for i in ind_2..parent_1.len() {
             new_child_1[i] = parent_1[i];
             new_child_2[i] = parent_2[i];
         }
@@ -202,14 +216,12 @@ impl Genetic {
         offsprings
     }
 
-    fn swap_mutation(&self, chromosome: &Rc<Chromosome>) -> Rc<Chromosome> {
+    fn random_mutation(&self, chromosome: &Rc<Chromosome>) -> Rc<Chromosome> {
         let mut new_gens: Vec<usize> = chromosome.gens.clone();
         if rand::thread_rng().gen_range(0.0..1.0) <= self.per_mutation {
             let i = rand::thread_rng().gen_range(0..new_gens.len());
-            let j = rand::thread_rng().gen_range(0..new_gens.len());
-            let t = new_gens[i];
-            new_gens[i] = new_gens[j];
-            new_gens[j] = t;
+            let j = rand::thread_rng().gen_range(1..25);
+            new_gens[i] = j;
         }
 
         let chromosome = Chromosome::new(new_gens);
@@ -219,7 +231,7 @@ impl Genetic {
     fn mutation(&self, offsprings: Vec<Rc<Chromosome>>) -> Vec<Rc<Chromosome>> {
         let mut offsprings = offsprings;
         for i in 0..offsprings.len() {
-            offsprings[i] = self.swap_mutation(&offsprings[i]);
+            offsprings[i] = self.random_mutation(&offsprings[i]);
         }
         offsprings
     }
@@ -239,7 +251,7 @@ impl Genetic {
     pub fn start_loop(&self) -> (Rc<Chromosome>, Vec<f32>) {
         let mut best_fitnesses: Vec<f32> = Vec::new();
         let mut best: Rc<Chromosome> = self.random_chromosome();
-        for _i in 1..=self.maxiter {
+        for i in 1..=self.maxiter {
             let parents = self.parent_selection();
             let mut offsprings = self.recombination(&parents);
             offsprings = self.mutation(offsprings);
@@ -249,6 +261,13 @@ impl Genetic {
             best_fitnesses.push(best_fitness);
             if best.fitness() < self_population[best_index].fitness() {
                 best = Rc::clone(&self_population[best_index]);
+            }
+
+            if i == self.maxiter {
+                println!("final population : ");
+                for chromosome in &*self_population {
+                    println!("{:?} , fitness : {:?}", chromosome.gens, chromosome.fitness());
+                }
             }
         }
         (best, best_fitnesses)
